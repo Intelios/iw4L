@@ -1,5 +1,7 @@
 # IW4L
 
+NOTE: This is the 'messing-about' branch which I entirely use for just messing around and is NOT for the faithful reimplementation of MW2 (and other games assets) like the main branch!
+
 <p align="center">
   <img src="docs/screenshots/bomb-plant.jpg" width="49%">
   <img src="docs/screenshots/tanker-explosion.jpg" width="49%">
