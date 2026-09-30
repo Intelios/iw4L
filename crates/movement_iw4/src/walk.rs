@@ -44,33 +44,36 @@ pub fn walk_move<C: CollisionBackend>(
 
     friction(ps, pml);
 
-    let command_scale =
-        cmd_scale_walk(ps, cmd, context.cmd_scale) * crate::damage_scale_walk(ps.damage_timer);
     crate::walk_move_drop_damage_timer(ps, pml.frametime);
-    let mut forward = pml.forward;
-    let mut right = pml.right;
-    forward[2] = 0.0;
-    right[2] = 0.0;
-    normalize(&mut forward);
-    normalize(&mut right);
+    let sliding = crate::player_slide::is_sliding(ps);
+    if !sliding {
+        let command_scale =
+            cmd_scale_walk(ps, cmd, context.cmd_scale) * crate::damage_scale_walk(ps.damage_timer);
+        let mut forward = pml.forward;
+        let mut right = pml.right;
+        forward[2] = 0.0;
+        right[2] = 0.0;
+        normalize(&mut forward);
+        normalize(&mut right);
 
-    let mut wishdir = [
-        (cmd.rightmove as f32) * right[0] + (cmd.forwardmove as f32) * forward[0],
-        (cmd.rightmove as f32) * right[1] + (cmd.forwardmove as f32) * forward[1],
-        (cmd.rightmove as f32) * right[2] + (cmd.forwardmove as f32) * forward[2],
-    ];
-    let wishspeed = normalize(&mut wishdir);
-    clip_to_ground_plane(&mut wishdir, &pml.ground_trace[1..4]);
+        let mut wishdir = [
+            (cmd.rightmove as f32) * right[0] + (cmd.forwardmove as f32) * forward[0],
+            (cmd.rightmove as f32) * right[1] + (cmd.forwardmove as f32) * forward[1],
+            (cmd.rightmove as f32) * right[2] + (cmd.forwardmove as f32) * forward[2],
+        ];
+        let wishspeed = normalize(&mut wishdir);
+        clip_to_ground_plane(&mut wishdir, &pml.ground_trace[1..4]);
 
-    accelerate(
-        ps,
-        pml,
-        &wishdir,
-        wishspeed * context.weapon_move_scale * command_scale,
-        walk_accel_scale(ps, pml),
-    );
+        accelerate(
+            ps,
+            pml,
+            &wishdir,
+            wishspeed * context.weapon_move_scale * command_scale,
+            walk_accel_scale(ps, pml),
+        );
+    }
 
-    if (pml.ground_trace[4] & 2) != 0 || (ps.pm_flags & 0x100) != 0 {
+    if (pml.ground_trace[4] & 2) != 0 || (ps.pm_flags & 0x100) != 0 || sliding {
         ps.velocity[2] -= (ps.gravity as f32) * pml.frametime;
     }
 

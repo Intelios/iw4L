@@ -1,6 +1,8 @@
-use playerstate_iw4::PlayerState;
+use playerstate_iw4::{PlayerState, pm_flags};
 
 use crate::Pml;
+
+const SLIDE_FRICTION: f32 = 1.8;
 
 #[allow(clippy::assign_op_pattern)]
 pub fn friction(ps: &mut PlayerState, pml: &Pml) {
@@ -11,7 +13,9 @@ pub fn friction(ps: &mut PlayerState, pml: &Pml) {
 
     let flags = ps.pm_flags;
     let mut drop = 0.0_f32;
-    if (flags & 0x10000) == 0 {
+    if (flags & pm_flags::SLIDE) != 0 {
+        drop = speed * SLIDE_FRICTION * pml.frametime;
+    } else if (flags & 0x10000) == 0 {
         if pml.walking != 0 && (pml.ground_trace[4] & 2) == 0 && (flags & 0x100) == 0 {
             let mut control = speed;
             if speed < 100.0 {

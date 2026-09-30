@@ -193,6 +193,10 @@ pub fn update_sprint(
         return end_for_dead_movement_type(ps, cmd);
     }
 
+    if (ps.pm_flags & pm_flags::SLIDE) != 0 {
+        return SprintResult::Unchanged;
+    }
+
     if context.weapon_max_sprint_time <= 0 {
         return end_for_dead_movement_type(ps, cmd);
     }

@@ -66,6 +66,11 @@ pub fn update_stance_flags<C: CollisionBackend>(
         return;
     }
 
+    if (ps.pm_flags & pm_flags::SLIDE) != 0 {
+        ps.pm_flags = (ps.pm_flags & !pm_flags::PRONE) | pm_flags::CROUCH;
+        return;
+    }
+
     if (ps.pm_flags & pm_flags::SPRINTING) != 0
         && (ps.pm_flags & (pm_flags::PRONE | pm_flags::CROUCH)) != 0
     {

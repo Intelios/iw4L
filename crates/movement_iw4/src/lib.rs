@@ -22,6 +22,7 @@ pub mod jump;
 mod ladder;
 pub mod mantle;
 mod melee_charge;
+mod player_slide;
 mod pml;
 mod pmove;
 mod single;
@@ -77,6 +78,10 @@ pub use mantle::{
 pub use melee_charge::{
     MeleeChargeWeaponDelays, PLAYER_MELEE_RANGE_DEFAULT as MELEE_CHARGE_PLAYER_MELEE_RANGE_DEFAULT,
     calc_melee_charge_time, melee_charge_clear, melee_charge_move,
+};
+pub use player_slide::{
+    SLIDE_TIME_MS, cancel as cancel_slide, is_sliding, try_start as try_start_slide,
+    update as update_slide,
 };
 pub use pml::Pml;
 pub use pmove::Pmove;

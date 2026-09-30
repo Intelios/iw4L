@@ -100,6 +100,7 @@ pub fn pmove<C: CollisionBackend, L: MantleXAnimLength, R: MantleRootDelta>(
     mantle::clear_hint(ps);
 
     let _ads = update_ads_intent(ps, cmd, context.old_buttons, context.ads_intent);
+    let slide_started = crate::player_slide::try_start(ps, cmd, context.old_buttons);
     let mut sprint = context.sprint;
     if ps.pm_flags & 3 != 0 {
         sprint.stand_up_clear = collision
@@ -122,7 +123,9 @@ pub fn pmove<C: CollisionBackend, L: MantleXAnimLength, R: MantleRootDelta>(
         context.bounds,
         context.weapon_blocks_prone,
     );
-    let stance_event = if ps.pm_flags & pm_flags::SPRINTING == 0 {
+    let stance_event = if slide_started {
+        Some(13)
+    } else if ps.pm_flags & pm_flags::SPRINTING == 0 {
         match (previous_stance, ps.pm_flags & 3) {
             (1, 0) => Some(16),
             (1, 2) => Some(12),
@@ -153,7 +156,7 @@ pub fn pmove<C: CollisionBackend, L: MantleXAnimLength, R: MantleRootDelta>(
         // The trigger link owns the origin: no walk, no air move, no jump, and
         // velocity zeroed every pmove. Viewangles and stance stay live above,
         // and the weapon ticks separately.
-        ps.pm_flags &= !pm_flags::LADDER;
+        ps.pm_flags &= !(pm_flags::LADDER | pm_flags::SLIDE);
         ps.ground_entity_num = ENTITYNUM_NONE;
         ps.velocity = [0.0; 3];
         drop_timers(ps, &pml);
@@ -186,6 +189,7 @@ pub fn pmove<C: CollisionBackend, L: MantleXAnimLength, R: MantleRootDelta>(
     }
 
     if (ps.pm_flags & pm_flags::MANTLE) != 0 {
+        crate::player_slide::cancel(ps);
         mantle::cap_view(ps, MantleCapViewContext::default());
         mantle::advance(ps, pml.msec, MantleMoveContext::default(), lengths, root);
         return PmoveResult {
@@ -197,6 +201,7 @@ pub fn pmove<C: CollisionBackend, L: MantleXAnimLength, R: MantleRootDelta>(
     }
 
     drop_timers(ps, &pml);
+    crate::player_slide::update(ps, &pml, cmd);
 
     {
         let mut ladder_backend = CollisionLadderBackend { collision, bounds };
@@ -213,6 +218,7 @@ pub fn pmove<C: CollisionBackend, L: MantleXAnimLength, R: MantleRootDelta>(
     }
 
     if (ps.pm_flags & pm_flags::LADDER) != 0 {
+        crate::player_slide::cancel(ps);
         ladder_move(
             ps,
             &mut pml,
@@ -228,6 +234,7 @@ pub fn pmove<C: CollisionBackend, L: MantleXAnimLength, R: MantleRootDelta>(
     } else {
         calc_melee_charge_time(ps, context.melee_charge, context.player_melee_range);
         if (ps.pm_flags & pm_flags::MELEE_CHARGE) != 0 {
+            crate::player_slide::cancel(ps);
             melee_charge_move(
                 ps,
                 &pml,

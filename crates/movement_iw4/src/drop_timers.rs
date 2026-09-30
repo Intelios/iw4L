@@ -2,7 +2,7 @@ use crate::Pml;
 use crate::jump;
 use playerstate_iw4::PlayerState;
 
-const PM_TIME_EXPIRY_CLEAR: u32 = 0x2180;
+const PM_TIME_EXPIRY_CLEAR: u32 = 0x0080_2180;
 
 pub fn drop_timers(ps: &mut PlayerState, pml: &Pml) {
     if ps.pm_time != 0 {

@@ -165,6 +165,8 @@ pub mod pm_flags {
     pub const SPRINT_BLOCKED: u32 = 0x0002_0000;
 
     pub const LAST_STAND: u32 = 0x0040_0000;
+
+    pub const SLIDE: u32 = 0x0080_0000;
 }
 
 pub mod weap_flags {
